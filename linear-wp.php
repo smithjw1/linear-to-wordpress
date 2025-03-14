@@ -32,7 +32,6 @@ if (file_exists(LINEAR_WP_PATH . 'vendor/autoload.php')) {
 
 // Include the main plugin class files
 require_once LINEAR_WP_PATH . 'includes/class-linear-config.php';
-require_once LINEAR_WP_PATH . 'includes/class-linear-loader.php';
 require_once LINEAR_WP_PATH . 'includes/class-linear-admin.php';
 require_once LINEAR_WP_PATH . 'includes/class-linear-webhook-handler.php';
 require_once LINEAR_WP_PATH . 'includes/class-linear.php';
@@ -48,17 +47,18 @@ function run_linear_wp() {
     
     try {
         $plugin = new LinearWP\Linear();
-        $plugin->run();
     } catch (Exception $e) {
-        // Log the exception
-        error_log('Linear WordPress Plugin Error: ' . $e->getMessage());
+        // Log the error
+        error_log('Linear WP Plugin Error: ' . $e->getMessage());
         
-        // Show admin notice if we're in the admin area
+        // Display admin notice if we're in the admin area
         if (is_admin()) {
             add_action('admin_notices', function() use ($e) {
-                echo '<div class="notice notice-error"><p>';
-                echo 'Linear WordPress Plugin Error: ' . esc_html($e->getMessage());
-                echo '</p></div>';
+                ?>
+                <div class="notice notice-error">
+                    <p><?php echo esc_html('Linear WP Plugin Error: ' . $e->getMessage()); ?></p>
+                </div>
+                <?php
             });
         }
     }

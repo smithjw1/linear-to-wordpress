@@ -30,17 +30,6 @@ class Config {
     const WEBHOOK_ACTION_UPDATE = 'update';
 
     /**
-     * Get plugin option with default fallback
-     *
-     * @param string $option_name Option name
-     * @param mixed $default Default value
-     * @return mixed
-     */
-    public static function get_option($option_name, $default = '') {
-        return get_option($option_name, $default);
-    }
-
-    /**
      * Get default post template
      *
      * @return string

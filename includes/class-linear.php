@@ -21,13 +21,6 @@ if (!defined('WPINC')) {
 class Linear {
 
     /**
-     * The loader that's responsible for maintaining and registering all hooks.
-     *
-     * @var Loader
-     */
-    protected $loader;
-
-    /**
      * The unique identifier of this plugin.
      *
      * @var string
@@ -46,44 +39,21 @@ class Linear {
      */
     public function __construct() {
         $this->version = LINEAR_WP_VERSION;
-        $this->load_dependencies();
-        $this->define_admin_hooks();
-        $this->define_webhook_hooks();
+        $this->register_hooks();
     }
 
     /**
-     * Load the required dependencies for this plugin.
+     * Register all hooks for the plugin
      */
-    private function load_dependencies() {
-        $this->loader = new Loader();
-    }
-
-    /**
-     * Register all of the hooks related to the admin area functionality
-     * of the plugin.
-     */
-    private function define_admin_hooks() {
+    private function register_hooks() {
+        // Admin hooks
         $plugin_admin = new Admin();
-
-        $this->loader->add_action('admin_menu', $plugin_admin, 'add_settings_page');
-        $this->loader->add_action('admin_init', $plugin_admin, 'register_settings');
-    }
-
-    /**
-     * Register all of the hooks related to the webhook functionality
-     * of the plugin.
-     */
-    private function define_webhook_hooks() {
-        $webhook_handler = new Webhook_Handler($this->get_plugin_name(), $this->get_version());
+        add_action('admin_menu', [$plugin_admin, 'add_settings_page']);
+        add_action('admin_init', [$plugin_admin, 'register_settings']);
         
-        $this->loader->add_action('rest_api_init', $webhook_handler, 'register_webhook_endpoint');
-    }
-
-    /**
-     * Run the loader to execute all of the hooks with WordPress.
-     */
-    public function run() {
-        $this->loader->run();
+        // Webhook hooks
+        $webhook_handler = new Webhook_Handler($this->get_plugin_name(), $this->get_version());
+        add_action('rest_api_init', [$webhook_handler, 'register_webhook_endpoint']);
     }
 
     /**
@@ -94,15 +64,6 @@ class Linear {
      */
     public function get_plugin_name() {
         return $this->plugin_name;
-    }
-
-    /**
-     * The reference to the class that orchestrates the hooks with the plugin.
-     *
-     * @return Loader    Orchestrates the hooks of the plugin.
-     */
-    public function get_loader() {
-        return $this->loader;
     }
 
     /**
