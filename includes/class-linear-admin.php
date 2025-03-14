@@ -35,26 +35,15 @@ class Admin {
      */
     public function __construct() {
         $this->plugin_name = 'linear-wp';
-        $this->version = '1.0.0';
         
         // Register settings
         add_action('admin_init', array($this, 'register_settings'));
-        
-        // Process forms
-        add_action('admin_init', array($this, 'process_forms'));
         
         // Add menu page
         add_action('admin_menu', array($this, 'add_settings_page'));
         
         // Register and enqueue admin assets
         add_action('admin_enqueue_scripts', array($this, 'register_admin_assets'));
-    }
-    
-    /**
-     * Initialize admin functionality
-     */
-    public function init() {
-        // No longer needed
     }
 
     /**
@@ -91,32 +80,6 @@ class Admin {
                 'default' => Config::get_default_post_template()
             )
         );
-    }
-
-    /**
-     * Process form submissions
-     */
-    public function process_forms() {
-        // Handle reset template
-        if (isset($_POST['reset_template']) && 
-            isset($_POST['linear_wp_reset_template_nonce']) && 
-            wp_verify_nonce($_POST['linear_wp_reset_template_nonce'], 'linear_wp_reset_template_nonce') &&
-            current_user_can('manage_options')) {
-            
-            // Get the default template
-            $default_template = Config::get_default_post_template();
-            
-            // Update the option
-            update_option('linear_wp_post_template', $default_template);
-            
-            // Add admin notice
-            add_settings_error(
-                'linear_wp_messages',
-                'template_reset',
-                'Template has been reset to default.',
-                'updated'
-            );
-        }
     }
 
     /**
