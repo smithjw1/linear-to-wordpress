@@ -35,6 +35,13 @@ class Project_Handler {
     private $version;
 
     /**
+     * Taxonomy handler instance
+     *
+     * @var Taxonomy
+     */
+    private $taxonomy;
+
+    /**
      * Initialize the class
      *
      * @param string $plugin_name The plugin name
@@ -43,6 +50,7 @@ class Project_Handler {
     public function __construct($plugin_name, $version) {
         $this->plugin_name = $plugin_name;
         $this->version = $version;
+        $this->taxonomy = new Taxonomy($plugin_name, $version);
     }
 
     /**
@@ -67,7 +75,7 @@ class Project_Handler {
     /**
      * Handle project creation
      *
-     * @param array $project_data
+     * @param array $project_data Project data from webhook
      * @return WP_REST_Response
      */
     public function handle_project_creation($project_data) {
@@ -80,38 +88,66 @@ class Project_Handler {
         }
         
         try {
-            // Format the content
+            // Check if project already exists
+            $posts = get_posts([
+                'post_type' => 'post',
+                'post_status' => ['publish', 'draft'],
+                'tax_query' => [
+                    [
+                        'taxonomy' => 'linear_project',
+                        'field' => 'slug',
+                        'terms' => sanitize_title($project_data['id'])
+                    ]
+                ],
+                'posts_per_page' => 1
+            ]);
+
+            if (!empty($posts)) {
+                return new WP_REST_Response([
+                    'success' => false,
+                    'message' => 'Project already exists'
+                ], 400);
+            }
+
+            // Format project content
             $content = $this->format_project_content($project_data);
-            
+
             // Create post
             $post_id = wp_insert_post([
                 'post_title'   => sanitize_text_field($project_data['name']),
                 'post_content' => $content,
                 'post_status'  => 'draft',
                 'post_type'    => 'post',
-                'meta_input'   => [
-                    'linear_project_id' => sanitize_text_field($project_data['id']),
-                    'linear_project_url' => esc_url_raw($project_data['url'])
-                ]
             ]);
-            
+
             if (is_wp_error($post_id)) {
-                return new WP_REST_Response([
-                    'success' => false,
-                    'message' => 'Error creating post: ' . $post_id->get_error_message()
-                ], 500);
+                throw new Exception('Failed to create post: ' . $post_id->get_error_message());
             }
-            
+
+            // Add project taxonomy term
+            $term_id = $this->taxonomy->get_or_create_project_term(
+                $project_data['id'],
+                $project_data['name'],
+                $project_data['url']
+            );
+
+            if (is_wp_error($term_id)) {
+                throw new Exception('Failed to create project term: ' . $term_id->get_error_message());
+            }
+
+            // Assign term to post
+            wp_set_post_terms($post_id, [$term_id], 'linear_project');
+
             return new WP_REST_Response([
                 'success' => true,
-                'message' => 'Post created successfully',
+                'message' => 'Project created successfully',
                 'post_id' => $post_id
             ], 201);
-            
+
         } catch (Exception $e) {
             return new WP_REST_Response([
                 'success' => false,
-                'message' => 'Error creating post: ' . $e->getMessage()
+                'message' => 'Error creating project: ' . $e->getMessage()
             ], 500);
         }
     }
@@ -119,8 +155,8 @@ class Project_Handler {
     /**
      * Format project content
      *
-     * @param array $project_data
-     * @return string
+     * @param array $project_data Project data
+     * @return string Formatted content
      */
     private function format_project_content($project_data) {
         // Get the template directly from WordPress options

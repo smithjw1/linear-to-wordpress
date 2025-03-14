@@ -51,6 +51,10 @@ class Linear {
         add_action('admin_menu', [$plugin_admin, 'add_settings_page']);
         add_action('admin_init', [$plugin_admin, 'register_settings']);
         
+        // Register taxonomies
+        $taxonomy_handler = new Taxonomy($this->get_plugin_name(), $this->get_version());
+        add_action('init', [$taxonomy_handler, 'register_taxonomies']);
+        
         // Webhook hooks
         $webhook_handler = new Webhook_Handler($this->get_plugin_name(), $this->get_version());
         add_action('rest_api_init', [$webhook_handler, 'register_webhook_endpoint']);

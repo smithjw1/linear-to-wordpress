@@ -1,6 +1,6 @@
 <?php
 /**
- * Project update handler for Linear webhook data
+ * Project update handler for Linear
  *
  * @package Linear_WP
  */
@@ -35,6 +35,13 @@ class Project_Update_Handler {
     private $version;
 
     /**
+     * Taxonomy handler instance
+     *
+     * @var Taxonomy
+     */
+    private $taxonomy;
+
+    /**
      * Initialize the class
      *
      * @param string $plugin_name The plugin name
@@ -43,6 +50,7 @@ class Project_Update_Handler {
     public function __construct($plugin_name, $version) {
         $this->plugin_name = $plugin_name;
         $this->version = $version;
+        $this->taxonomy = new Taxonomy($plugin_name, $version);
     }
 
     /**
@@ -63,12 +71,12 @@ class Project_Update_Handler {
     /**
      * Handle project update
      *
-     * @param array $project_data
+     * @param array $project_data Project update data from webhook
      * @return WP_REST_Response
      */
     public function handle_project_update($project_data) {
         try {
-            // Validate project update data
+            // Validate project data
             if (!$this->validate_project_update_data($project_data)) {
                 return new WP_REST_Response([
                     'success' => false,
@@ -80,15 +88,20 @@ class Project_Update_Handler {
             $posts = get_posts([
                 'post_type' => 'post',
                 'post_status' => ['publish', 'draft'],
-                'meta_key' => 'linear_project_id',
-                'meta_value' => sanitize_text_field($project_data['project']['id']),
+                'tax_query' => [
+                    [
+                        'taxonomy' => 'linear_project',
+                        'field' => 'slug',
+                        'terms' => sanitize_title($project_data['project']['id'])
+                    ]
+                ],
                 'posts_per_page' => 1
             ]);
             
             if (empty($posts)) {
                 return new WP_REST_Response([
                     'success' => false,
-                    'message' => 'No post found for this project'
+                    'message' => 'Project not found'
                 ], 404);
             }
             
@@ -102,43 +115,45 @@ class Project_Update_Handler {
             // Format the update as a comment
             $comment_content = $this->format_update_as_comment($project_data);
             
+            // Get the user who posted the update
+            $comment_author = 'Linear';
+            if (isset($project_data['user']) && isset($project_data['user']['name'])) {
+                $comment_author = sanitize_text_field($project_data['user']['name']);
+            } elseif (isset($project_data['updatedBy']) && isset($project_data['updatedBy']['name'])) {
+                $comment_author = sanitize_text_field($project_data['updatedBy']['name']);
+            }
+            
             // Add comment to post
             $comment_id = wp_insert_comment([
                 'comment_post_ID' => $post->ID,
                 'comment_content' => $comment_content,
                 'comment_type' => 'linear_update',
-                'comment_approved' => 1,
-                'comment_author' => 'Linear',
-                'comment_meta' => [
-                    'linear_update_id' => sanitize_text_field($project_data['id'])
-                ]
+                'comment_author' => $comment_author,
+                'comment_approved' => 1
             ]);
             
-            if (is_wp_error($comment_id)) {
-                return new WP_REST_Response([
-                    'success' => false,
-                    'message' => 'Error adding comment: ' . $comment_id->get_error_message()
-                ], 500);
+            if (!$comment_id) {
+                throw new Exception('Failed to create comment');
             }
             
             return new WP_REST_Response([
                 'success' => true,
-                'message' => 'Update added as comment',
+                'message' => 'Project update added as comment',
                 'comment_id' => $comment_id
             ], 201);
             
         } catch (Exception $e) {
             return new WP_REST_Response([
                 'success' => false,
-                'message' => 'Error processing update: ' . $e->getMessage()
+                'message' => 'Error processing project update: ' . $e->getMessage()
             ], 500);
         }
     }
-
+    
     /**
      * Format update as comment
      *
-     * @param array $update_data
+     * @param array $update_data Update data
      * @return string
      */
     private function format_update_as_comment($update_data) {
@@ -146,9 +161,9 @@ class Project_Update_Handler {
         
         // Add body/content of the update if present
         if (isset($update_data['body'])) {
-            $comment .= '<div class="linear-update-body">' . wp_kses_post($update_data['body']) . '</div>';
+            $comment .= '<div class="update-body">' . wp_kses_post($update_data['body']) . '</div>';
         }
-
+        
         // Add health status if present
         if (isset($update_data['health'])) {
             $new_health = $update_data['health'];
@@ -163,7 +178,7 @@ class Project_Update_Handler {
             $state_name = isset($state['name']) ? sanitize_text_field($state['name']) : '';
             
             if (!empty($state_name)) {
-                $comment .= '<div class="linear-update-state">';
+                $comment .= '<div class="update-state">';
                 $comment .= '<p>Status changed to: ' . esc_html($state_name) . '</p>';
                 $comment .= '</div>';
             }
