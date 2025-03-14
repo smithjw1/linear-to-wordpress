@@ -79,6 +79,7 @@ class Project_Update_Handler {
             // Find existing post by project ID
             $posts = get_posts([
                 'post_type' => 'post',
+                'post_status' => ['publish', 'draft'],
                 'meta_key' => 'linear_project_id',
                 'meta_value' => sanitize_text_field($project_data['project']['id']),
                 'posts_per_page' => 1
@@ -92,6 +93,11 @@ class Project_Update_Handler {
             }
             
             $post = $posts[0];
+            
+            // Check if post is a draft and publish it if needed
+            if ($post->post_status === 'draft') {
+                wp_publish_post($post->ID);
+            }
             
             // Format the update as a comment
             $comment_content = $this->format_update_as_comment($project_data);
@@ -136,7 +142,7 @@ class Project_Update_Handler {
      * @return string
      */
     private function format_update_as_comment($update_data) {
-        $comment = '<h2>Project Update - ' . date('F j, Y') . '</h2>';
+        $comment = '<h2>Project Update - ' . date_i18n(get_option('date_format')) . '</h2>';
         
         // Add body/content of the update if present
         if (isset($update_data['body'])) {

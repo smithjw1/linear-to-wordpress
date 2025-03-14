@@ -71,10 +71,15 @@ class Config {
 
 <!-- wp:paragraph -->
 <p>{description}</p>
-<!-- /wp:paragraph -->';
+<!-- /wp:paragraph -->
 
-        return $template;
-    }
+<!-- wp:buttons -->
+<div class="wp-block-buttons"><!-- wp:button {"backgroundColor":"vivid-cyan-blue","textColor":"white","className":"is-style-fill"} -->
+<div class="wp-block-button is-style-fill"><a class="wp-block-button__link has-white-color has-vivid-cyan-blue-background-color has-text-color has-background" href="{url}" target="_blank" rel="noreferrer noopener">View on Linear</a></div>
+<!-- /wp:button --></div>
+<!-- /wp:buttons -->';
+return $template;
+}
 
     /**
      * Get health status mapping

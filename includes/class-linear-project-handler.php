@@ -87,7 +87,7 @@ class Project_Handler {
             $post_id = wp_insert_post([
                 'post_title'   => sanitize_text_field($project_data['name']),
                 'post_content' => $content,
-                'post_status'  => 'publish',
+                'post_status'  => 'draft',
                 'post_type'    => 'post',
                 'meta_input'   => [
                     'linear_project_id' => sanitize_text_field($project_data['id']),
