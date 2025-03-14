@@ -1,0 +1,75 @@
+/**
+ * Linear WordPress Integration Admin CSS
+ */
+
+/* Main admin container */
+.linear-wp-admin {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+/* Cards */
+.linear-wp-admin .card {
+    background: #fff;
+    border: 1px solid #c3c4c7;
+    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.04);
+    padding: 20px;
+    border-radius: 4px;
+    margin-bottom: 20px;
+    width: 100%;
+    max-width: none;
+    box-sizing: border-box;
+}
+
+.linear-wp-admin .card h2 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    font-size: 1.3em;
+}
+
+/* Form elements */
+.linear-wp-admin .components-panel {
+    margin-bottom: 20px;
+}
+
+.linear-wp-admin .components-panel__body {
+    border: 1px solid #e0e0e0;
+    background: #f6f7f7;
+    padding: 16px;
+    margin-bottom: 16px;
+    border-radius: 2px;
+}
+
+.linear-wp-admin textarea {
+    width: 100%;
+    min-height: 200px;
+}
+
+/* Template placeholder section */
+.linear-wp-admin .placeholder-columns {
+    display: flex;
+    flex-wrap: wrap;
+    margin-top: 10px;
+}
+
+.linear-wp-admin .placeholder-column {
+    flex: 1;
+    min-width: 150px;
+    margin-right: 20px;
+    margin-bottom: 10px;
+}
+
+.linear-wp-admin .placeholder-column:last-child {
+    margin-right: 0;
+}
+
+/* Responsive adjustments */
+@media screen and (max-width: 782px) {
+    .linear-wp-admin .placeholder-columns {
+        flex-direction: column;
+    }
+    
+    .linear-wp-admin .placeholder-column {
+        margin-right: 0;
+    }
+}

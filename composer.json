@@ -1,0 +1,21 @@
+{
+    "name": "jacobsmith/linear-wp",
+    "description": "Integrates Linear projects with WordPress by creating posts from webhook data",
+    "type": "wordpress-plugin",
+    "require": {
+        "php": ">=7.2",
+        "erusev/parsedown": "^1.7"
+    },
+    "autoload": {
+        "psr-4": {
+            "LinearWP\\": "includes/"
+        }
+    },
+    "license": "GPL-2.0-or-later",
+    "authors": [
+        {
+            "name": "Jacob Smith"
+        }
+    ],
+    "minimum-stability": "stable"
+}

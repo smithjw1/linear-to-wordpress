@@ -1,0 +1,14 @@
+# Ignore plugin build files
+/node_modules/
+/.cache/
+
+# Ignore log files
+*.log
+
+# Ignore OS generated files
+.DS_Store
+
+# Composer
+/vendor/
+/composer.lock
+composer.phar
