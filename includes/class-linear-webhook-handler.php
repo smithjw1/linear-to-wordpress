@@ -69,17 +69,17 @@ class Webhook_Handler {
         register_rest_route('linear-wp/v1', '/webhook', [
             'methods' => 'POST',
             'callback' => [$this, 'process_webhook'],
-            'permission_callback' => '__return_true',
+            'permission_callback' => [$this, 'validate_webhook_request'],
         ]);
     }
 
     /**
-     * Process webhook
+     * Validate webhook request
      *
      * @param WP_REST_Request $request
-     * @return WP_REST_Response
+     * @return bool|WP_REST_Response
      */
-    public function process_webhook(WP_REST_Request $request) {
+    public function validate_webhook_request(WP_REST_Request $request) {
         try {
             // Get request data
             $data = $request->get_json_params();
@@ -100,6 +100,26 @@ class Webhook_Handler {
                     'message' => 'Invalid webhook data'
                 ], 400);
             }
+            
+            return true;
+        } catch (Exception $e) {
+            return new WP_REST_Response([
+                'success' => false,
+                'message' => 'Error validating webhook: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Process webhook
+     *
+     * @param WP_REST_Request $request
+     * @return WP_REST_Response
+     */
+    public function process_webhook(WP_REST_Request $request) {
+        try {
+            // Get request data
+            $data = $request->get_json_params();
             
             // Process based on webhook type and action
             if ($data['type'] === Config::WEBHOOK_TYPE_PROJECT && 
