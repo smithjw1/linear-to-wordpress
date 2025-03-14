@@ -35,7 +35,6 @@ class Admin {
      */
     public function __construct() {
         $this->plugin_name = 'linear-wp';
-        $this->version = '1.0.0';
         
         // Register settings
         add_action('admin_init', array($this, 'register_settings'));
@@ -49,13 +48,6 @@ class Admin {
         // Register and enqueue admin assets
         add_action('admin_enqueue_scripts', array($this, 'register_admin_assets'));
     }
-    
-    /**
-     * Initialize admin functionality
-     */
-    public function init() {
-        // No longer needed
-    }
 
     /**
      * Add settings page
@@ -67,29 +59,6 @@ class Admin {
             'manage_options',
             'linear-wp-settings',
             array($this, 'render_settings_page')
-        );
-    }
-
-    /**
-     * Register all settings
-     */
-    public function register_settings() {
-        register_setting(
-            'linear_wp_settings',
-            'linear_wp_webhook_secret',
-            array(
-                'sanitize_callback' => 'sanitize_text_field',
-                'default' => ''
-            )
-        );
-
-        register_setting(
-            'linear_wp_settings',
-            'linear_wp_post_template',
-            array(
-                'sanitize_callback' => 'wp_kses_post',
-                'default' => Config::get_default_post_template()
-            )
         );
     }
 
@@ -117,6 +86,29 @@ class Admin {
                 'updated'
             );
         }
+    }
+
+    /**
+     * Register all settings
+     */
+    public function register_settings() {
+        register_setting(
+            'linear_wp_settings',
+            'linear_wp_webhook_secret',
+            array(
+                'sanitize_callback' => 'sanitize_text_field',
+                'default' => ''
+            )
+        );
+
+        register_setting(
+            'linear_wp_settings',
+            'linear_wp_post_template',
+            array(
+                'sanitize_callback' => 'wp_kses_post',
+                'default' => Config::get_default_post_template()
+            )
+        );
     }
 
     /**
