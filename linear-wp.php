@@ -33,6 +33,8 @@ if (file_exists(LINEAR_WP_PATH . 'vendor/autoload.php')) {
 // Include the main plugin class files
 require_once LINEAR_WP_PATH . 'includes/class-linear-config.php';
 require_once LINEAR_WP_PATH . 'includes/class-linear-admin.php';
+require_once LINEAR_WP_PATH . 'includes/class-linear-project-handler.php';
+require_once LINEAR_WP_PATH . 'includes/class-linear-project-update-handler.php';
 require_once LINEAR_WP_PATH . 'includes/class-linear-webhook-handler.php';
 require_once LINEAR_WP_PATH . 'includes/class-linear.php';
 

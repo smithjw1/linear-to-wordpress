@@ -79,30 +79,47 @@ class Config {
     /**
      * Get health status mapping
      *
-     * @param string $health_key Health key from Linear
+     * @param string $health_key Health status key
      * @return array
      */
     public static function get_health_status_mapping($health_key = '') {
-        $health_statuses = array(
-            'onTrack' => array(
+        $health_statuses = [
+            'onTrack' => [
                 'text' => 'On Track',
-                'color' => '#2DA446'
-            ),
-            'atRisk' => array(
-                'text' => 'At Risk',
-                'color' => '#F2C94C'
-            ),
-            'offTrack' => array(
+                'color' => '#34D399' // Green
+            ],
+            'offTrack' => [
                 'text' => 'Off Track',
-                'color' => '#EB5757'
-            ),
-        );
-
-        if (isset($health_statuses[$health_key])) {
+                'color' => '#F87171' // Red
+            ],
+            'atRisk' => [
+                'text' => 'At Risk',
+                'color' => '#FBBF24' // Yellow/Orange
+            ]
+        ];
+        
+        if (!empty($health_key) && isset($health_statuses[$health_key])) {
             return $health_statuses[$health_key];
         }
-
-        // Default to on track if not found
+        
+        // Default to "On Track" if not found
         return $health_statuses['onTrack'];
+    }
+    
+    /**
+     * Format health text with colored dot
+     *
+     * @param string $health Health status from Linear
+     * @return string Formatted health text with colored dot
+     */
+    public static function format_health_text($health) {
+        $health_mapping = self::get_health_status_mapping($health);
+        $color = $health_mapping['color'];
+        $text = $health_mapping['text'];
+        
+        // Create colored dot using inline CSS
+        $dot = '<span style="display:inline-block; width:12px; height:12px; border-radius:50%; background-color:' . esc_attr($color) . '; margin-right:5px;"></span>';
+        
+        return $dot . $text;
     }
 }

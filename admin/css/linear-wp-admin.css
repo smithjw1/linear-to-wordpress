@@ -44,24 +44,3 @@
     width: 100%;
     min-height: 200px;
 }
-
-/* Health status indicators */
-.health-indicator {
-    display: inline-block;
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-    margin-right: 5px;
-}
-
-.health-on-track {
-    background-color: #4caf50;
-}
-
-.health-at-risk {
-    background-color: #ff9800;
-}
-
-.health-off-track {
-    background-color: #f44336;
-}
